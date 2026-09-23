@@ -26,9 +26,12 @@ export const env = {
     apiKey: process.env.CLOUDINARY_API_KEY ?? "",
     apiSecret: process.env.CLOUDINARY_API_SECRET ?? "",
   },
-  resend: {
-    apiKey: process.env.RESEND_API_KEY ?? "",
-    fromEmail: process.env.RESEND_FROM_EMAIL ?? "",
+  smtp: {
+    host: process.env.SMTP_HOST ?? "",
+    port: Number(process.env.SMTP_PORT ?? 587),
+    user: process.env.SMTP_USER ?? "",
+    pass: process.env.SMTP_PASS ?? "",
+    from: process.env.EMAIL_FROM ?? "",
   },
   rateLimit: {
     windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS ?? 900000),

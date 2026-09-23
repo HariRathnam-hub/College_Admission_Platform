@@ -1,4 +1,4 @@
-import { resendClient, isEmailConfigured } from "../config/resend";
+import { mailTransporter, isEmailConfigured } from "../config/mailer";
 import { env } from "../config/env";
 import { logger } from "../utils/logger";
 
@@ -9,14 +9,14 @@ interface SendEmailParams {
 }
 
 export async function sendEmail({ to, subject, html }: SendEmailParams): Promise<boolean> {
-  if (!isEmailConfigured || !resendClient) {
+  if (!isEmailConfigured || !mailTransporter) {
     logger.info(`[email:skipped - not configured] to=${to} subject="${subject}"`);
     return false;
   }
 
   try {
-    await resendClient.emails.send({
-      from: env.resend.fromEmail,
+    await mailTransporter.sendMail({
+      from: env.smtp.from,
       to,
       subject,
       html,
