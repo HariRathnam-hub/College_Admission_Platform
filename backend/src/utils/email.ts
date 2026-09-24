@@ -1,26 +1,21 @@
-import { mailTransporter, isEmailConfigured } from "../config/mailer";
-import { env } from "../config/env";
+import { sendViaBrevo, isEmailConfigured } from "../config/brevo";
 import { logger } from "../utils/logger";
 
 interface SendEmailParams {
   to: string;
   subject: string;
   html: string;
+  toName?: string;
 }
 
-export async function sendEmail({ to, subject, html }: SendEmailParams): Promise<boolean> {
-  if (!isEmailConfigured || !mailTransporter) {
+export async function sendEmail({ to, subject, html, toName }: SendEmailParams): Promise<boolean> {
+  if (!isEmailConfigured) {
     logger.info(`[email:skipped - not configured] to=${to} subject="${subject}"`);
     return false;
   }
 
   try {
-    await mailTransporter.sendMail({
-      from: env.smtp.from,
-      to,
-      subject,
-      html,
-    });
+    await sendViaBrevo({ to, toName, subject, html });
     return true;
   } catch (error) {
     logger.error(`Failed to send email to ${to}: ${(error as Error).message}`);

@@ -18,7 +18,7 @@ college-admission-platform/
 ```bash
 cd backend
 npm install
-cp .env.example .env   # MONGODB_URI + JWT secrets are required; Cloudinary/Brevo are optional
+cp .env.example .env   # MONGODB_URI + JWT secrets are required; Cloudinary/Brevo API key are optional
 npm run seed:programs   # optional: seeds 20 sample engineering programs
 npm run seed:admin      # required once: creates the first Admin login (see below)
 npm run dev              # http://localhost:5000
@@ -33,8 +33,8 @@ npm run dev              # http://localhost:5173
 
 Document uploads fall back to local disk (served at `/uploads`) without
 Cloudinary credentials, and notification emails are logged instead of sent
-without SMTP credentials (`SMTP_HOST`/`SMTP_USER`/`SMTP_PASS`/`EMAIL_FROM` —
-see "Email (Brevo SMTP)" below).
+without a Brevo API key (`BREVO_API_KEY`/`EMAIL_FROM` —
+see "Email (Brevo API)" below).
 
 ## Roles
 
@@ -74,34 +74,38 @@ leaking which emails are registered) → click the emailed link
 (`/reset-password?token=...`, valid for 1 hour) → set a new password. On
 reset, every existing session (access + refresh tokens) for that account is
 invalidated, so a stolen session can't outlive a password change. When
-SMTP isn't configured, the reset link is logged to the server console
+Brevo isn't configured, the reset link is logged to the server console
 instead of emailed, so the flow is still testable locally.
 
-### Email (Brevo SMTP)
+### Email (Brevo API)
 
 All notification emails (registration is silent, but application submitted /
 faculty review / correction requested / admin approved / admin declined /
-password reset) are sent through [Brevo](https://www.brevo.com)'s SMTP relay
-via Nodemailer.
+password reset) are sent through [Brevo](https://www.brevo.com)'s
+**transactional email HTTPS API** — not SMTP. This matters if you deploy to
+Render, Railway, or similar: those platforms (Render's free tier especially)
+block outbound SMTP ports (25/465/587) entirely, so an SMTP-based mailer
+hangs every request until it times out. Plain HTTPS on port 443 is never
+blocked, and this needs no extra npm package — it uses Node's built-in
+`fetch`.
 
 1. Sign up at brevo.com and verify a sender (an email address or a domain)
    under **Senders, Domains & Dedicated IPs**.
-2. Go to **SMTP & API → SMTP tab** to find your SMTP login and generate an
-   SMTP key (this is not your Brevo account password).
+2. Go to **SMTP & API → API Keys tab** and generate a new **API key** (this
+   is different from the SMTP key — make sure you copy the API key, not the
+   SMTP one).
 3. In `backend/.env`, set:
    ```
-   SMTP_HOST=smtp-relay.brevo.com
-   SMTP_PORT=587
-   SMTP_USER=your-brevo-login@example.com
-   SMTP_PASS=your-brevo-smtp-key
+   BREVO_API_KEY=your-brevo-api-key
    EMAIL_FROM="College Admissions <no-reply@yourdomain.com>"
    ```
    `EMAIL_FROM` must be an address (or on a domain) verified as a sender in
-   Brevo, or sends will be rejected.
-4. Restart the backend. On startup it logs whether the SMTP connection
-   verified successfully. Without these variables set, email sending is
-   skipped and every email is logged to the console/`backend/logs` instead —
-   the app keeps working, you just won't receive real emails.
+   Brevo, or sends will be rejected. The `Name <email>` format is optional —
+   a bare email address also works.
+4. Restart the backend. On startup it logs whether Brevo is configured.
+   Without these variables set, email sending is skipped and every email is
+   logged to the console/`backend/logs` instead — the app keeps working, you
+   just won't receive real emails.
 
 Brevo's free tier includes 300 emails/day, which is fine for development and
 small deployments but not high-volume

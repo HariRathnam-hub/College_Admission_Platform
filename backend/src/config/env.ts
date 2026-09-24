@@ -26,11 +26,8 @@ export const env = {
     apiKey: process.env.CLOUDINARY_API_KEY ?? "",
     apiSecret: process.env.CLOUDINARY_API_SECRET ?? "",
   },
-  smtp: {
-    host: process.env.SMTP_HOST ?? "",
-    port: Number(process.env.SMTP_PORT ?? 587),
-    user: process.env.SMTP_USER ?? "",
-    pass: process.env.SMTP_PASS ?? "",
+  brevo: {
+    apiKey: process.env.BREVO_API_KEY ?? "",
     from: process.env.EMAIL_FROM ?? "",
   },
   rateLimit: {
