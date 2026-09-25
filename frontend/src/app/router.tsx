@@ -1,4 +1,5 @@
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import { lazy, Suspense } from "react";
+import { createBrowserRouter } from "react-router-dom";
 import { ProtectedRoute, PublicOnlyRoute } from "./ProtectedRoute";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import LoginPage from "@/features/auth/LoginPage";
@@ -27,13 +28,14 @@ import AssignedReviewsPage from "@/features/faculty/AssignedReviewsPage";
 import ApplicationReviewDetailPage from "@/features/faculty/ApplicationReviewDetailPage";
 import FacultyDocumentsPage from "@/features/faculty/FacultyDocumentsPage";
 import FacultyProfilePage from "@/features/faculty/FacultyProfilePage";
+const LandingPage = lazy(() => import("@/pages/LandingPage"));
 import NotFoundPage from "@/pages/NotFoundPage";
 
 export const router = createBrowserRouter([
-  { path: "/", element: <Navigate to="/dashboard" replace /> },
   {
     element: <PublicOnlyRoute />,
     children: [
+      { path: "/", element: <Suspense fallback={null}><LandingPage /></Suspense> },
       { path: "/login", element: <LoginPage /> },
       { path: "/faculty/login", element: <FacultyLoginPage /> },
       { path: "/admin/login", element: <AdminLoginPage /> },

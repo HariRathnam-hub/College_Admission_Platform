@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { EmptyState } from "@/components/shared/dashboard-ui";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useAdminDocumentsQuery } from "./admin.api";
@@ -35,7 +36,7 @@ export default function AdminDocumentsPage() {
 
       <Card>
         <CardContent className="p-0">
-          {isLoading && <p className="p-6 text-sm text-muted-foreground">Loading documents…</p>}
+          {isLoading && <EmptyState title="Loading documents…" />}
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="border-b bg-muted/40 text-left text-xs uppercase text-muted-foreground">
@@ -75,7 +76,7 @@ export default function AdminDocumentsPage() {
                 })}
               </tbody>
             </table>
-            {documents?.length === 0 && <p className="p-6 text-sm text-muted-foreground">No documents found.</p>}
+            {documents?.length === 0 && <EmptyState title="No documents found" />}
           </div>
         </CardContent>
       </Card>

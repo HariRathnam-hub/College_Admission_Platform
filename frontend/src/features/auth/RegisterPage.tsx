@@ -6,8 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { AlertCircle } from "lucide-react";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { FloatField } from "@/components/ui/float-field";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 
@@ -64,26 +63,22 @@ export default function RegisterPage() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="name">Full name</Label>
-              <Input id="name" placeholder="Jane Doe" {...register("name")} />
+              <FloatField id="name" label="Full name" {...register("name")} />
               {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="you@example.com" {...register("email")} />
+              <FloatField id="email" label="Email" type="email" {...register("email")} />
               {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" placeholder="••••••••" {...register("password")} />
+              <FloatField id="password" label="Password" type="password" {...register("password")} />
               {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm password</Label>
-              <Input id="confirmPassword" type="password" placeholder="••••••••" {...register("confirmPassword")} />
+              <FloatField id="confirmPassword" label="Confirm password" type="password" {...register("confirmPassword")} />
               {errors.confirmPassword && (
                 <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>
               )}

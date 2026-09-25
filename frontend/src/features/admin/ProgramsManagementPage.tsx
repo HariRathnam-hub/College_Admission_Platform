@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { EmptyState } from "@/components/shared/dashboard-ui";
 import { useForm } from "react-hook-form";
 import { Plus, Pencil, Ban, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -166,7 +167,7 @@ export default function ProgramsManagementPage() {
 
       <Card>
         <CardContent className="p-0">
-          {isLoading && <p className="p-6 text-sm text-muted-foreground">Loading programs…</p>}
+          {isLoading && <EmptyState title="Loading programs…" />}
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="border-b bg-muted/40 text-left text-xs uppercase text-muted-foreground">
@@ -214,7 +215,7 @@ export default function ProgramsManagementPage() {
               </tbody>
             </table>
             {programs?.length === 0 && (
-              <p className="p-6 text-sm text-muted-foreground">No programs yet. Create your first one.</p>
+              <EmptyState title="No programs yet. Create your first one" />
             )}
           </div>
         </CardContent>

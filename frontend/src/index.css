@@ -53,3 +53,33 @@
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
+
+/* ---------- Public / auth design language ---------- */
+.mesh{background:radial-gradient(60% 50% at 15% 10%,rgba(99,102,241,.35),transparent 60%),radial-gradient(50% 45% at 85% 20%,rgba(139,92,246,.22),transparent 60%),radial-gradient(55% 50% at 60% 95%,rgba(34,211,238,.10),transparent 60%);animation:meshShift 24s ease-in-out infinite alternate}
+@keyframes meshShift{to{transform:scale(1.12) translate3d(2%,-2%,0)}}
+.grid-pattern{background-image:linear-gradient(rgba(148,163,184,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(148,163,184,.06) 1px,transparent 1px);background-size:56px 56px;-webkit-mask-image:radial-gradient(ellipse at 50% 30%,#000 30%,transparent 75%);mask-image:radial-gradient(ellipse at 50% 30%,#000 30%,transparent 75%)}
+.orb{position:absolute;border-radius:9999px;filter:blur(90px);animation:drift 18s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate3d(30px,-40px,0)}}
+.particle{position:absolute;border-radius:9999px;background:rgba(199,210,254,.6);animation:rise 14s linear infinite}
+@keyframes rise{from{transform:translateY(0);opacity:0}15%{opacity:.8}to{transform:translateY(-140px);opacity:0}}
+.float{animation:floaty 7s ease-in-out infinite}
+@keyframes floaty{50%{transform:translateY(-10px)}}
+.glass{background:rgba(148,163,184,.08);border:1px solid rgba(165,180,252,.18);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 24px 50px -24px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.06)}
+@media (prefers-reduced-motion:reduce){.mesh,.orb,.particle,.float{animation:none}}
+
+/* Re-themes shadcn tokens inside auth pages only; dashboards are untouched. */
+.auth-scope{--foreground:210 40% 96%;--muted-foreground:215 20% 72%;--card:228 40% 16% / .6;--card-foreground:210 40% 96%;--background:228 45% 10% / .6;--input:230 30% 30%;--border:230 30% 26%;--primary:243 85% 72%;--primary-foreground:226 47% 10%;--ring:243 85% 72%;--destructive:0 62% 72%}
+.auth-scope,.auth-scope *{--tw-ring-offset-color:transparent}
+.auth-scope .bg-card{-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border-color:rgba(165,180,252,.22);box-shadow:0 30px 60px -30px rgba(0,0,0,.7),0 0 0 1px rgba(99,102,241,.08),inset 0 1px 0 rgba(255,255,255,.06)}
+.auth-scope input{transition:border-color .2s,box-shadow .2s,background-color .2s;color:#e2e8f0}
+.auth-scope input:focus{border-color:rgba(165,180,252,.7);box-shadow:0 0 0 4px rgba(99,102,241,.18)}
+
+/* ---------- Dashboard polish (light + dark) ---------- */
+.dash-scope{--card:0 0% 100% / .78}
+.dark .dash-scope{--card:226 38% 13% / .72}
+.dash-bg{background:radial-gradient(60% 40% at 10% 0%,rgba(99,102,241,.10),transparent 60%),radial-gradient(40% 30% at 100% 10%,rgba(34,211,238,.07),transparent 60%),hsl(var(--background));background-attachment:fixed}
+.dash-scope .bg-card{-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.dash-scope thead th{font-weight:500;color:hsl(var(--muted-foreground));background:hsl(var(--muted)/.5)}
+.dash-scope tbody tr{transition:background-color .15s}
+.dash-scope tbody tr:hover{background:hsl(var(--muted)/.45)}
+.dash-scope input:focus-visible,.dash-scope select:focus-visible,.dash-scope textarea:focus-visible{box-shadow:0 0 0 3px hsl(var(--ring)/.18)}

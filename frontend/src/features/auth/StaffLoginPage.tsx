@@ -6,8 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { AlertCircle, ShieldCheck } from "lucide-react";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { FloatField } from "@/components/ui/float-field";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { UserRole } from "./auth.types";
@@ -63,19 +62,15 @@ export function StaffLoginPage({ role, title, subtitle }: StaffLoginPageProps) {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="you@college.edu" {...register("email")} />
+              <FloatField id="email" label="Email" type="email" {...register("email")} />
               {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <Link to="/forgot-password" className="text-xs font-medium text-primary hover:underline">
+              <FloatField id="password" label="Password" type="password" {...register("password")} />
+            <div className="text-right"><Link to="/forgot-password" className="text-xs font-medium text-primary hover:underline">
                   Forgot password?
-                </Link>
-              </div>
-              <Input id="password" type="password" placeholder="••••••••" {...register("password")} />
+                </Link></div>
               {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
             </div>
 

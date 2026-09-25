@@ -1,5 +1,7 @@
 import { Users, GraduationCap, FileText, CheckCircle2, XCircle, Clock, FileCheck } from "lucide-react";
+import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { StatCard } from "@/components/shared/dashboard-ui";
 import { useAnalyticsQuery } from "./admin.api";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -37,21 +39,13 @@ export default function AnalyticsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Analytics</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Analytics</h1>
         <p className="text-muted-foreground">A snapshot of platform activity.</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {statCards.map((stat) => (
-          <Card key={stat.label}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">{stat.label}</CardTitle>
-              <stat.icon className="h-5 w-5 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-            </CardContent>
-          </Card>
+        {statCards.map((stat, i) => (
+          <StatCard key={stat.label} index={i} label={stat.label} value={stat.value} icon={stat.icon} />
         ))}
       </div>
 
@@ -68,9 +62,11 @@ export default function AnalyticsPage() {
                 <span className="text-muted-foreground">{count}</span>
               </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full bg-primary"
-                  style={{ width: `${(count / maxStatusCount) * 100}%` }}
+                <motion.div
+                  className="h-full rounded-full bg-gradient-to-r from-indigo-400 to-cyan-400"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${(count / maxStatusCount) * 100}%` }}
+                  transition={{ duration: 0.7, ease: "easeOut" }}
                 />
               </div>
             </div>

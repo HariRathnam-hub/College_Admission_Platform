@@ -6,8 +6,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { FloatField } from "@/components/ui/float-field";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { resetPasswordRequest } from "./auth.api";
 
@@ -90,13 +89,11 @@ export default function ResetPasswordPage() {
                 </div>
               )}
               <div className="space-y-2">
-                <Label htmlFor="newPassword">New password</Label>
-                <Input id="newPassword" type="password" placeholder="••••••••" {...register("newPassword")} />
+                <FloatField id="newPassword" label="New password" type="password" {...register("newPassword")} />
                 {errors.newPassword && <p className="text-xs text-destructive">{errors.newPassword.message}</p>}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm new password</Label>
-                <Input id="confirmPassword" type="password" placeholder="••••••••" {...register("confirmPassword")} />
+                <FloatField id="confirmPassword" label="Confirm new password" type="password" {...register("confirmPassword")} />
                 {errors.confirmPassword && (
                   <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>
                 )}

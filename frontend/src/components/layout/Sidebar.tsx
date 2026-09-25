@@ -56,7 +56,7 @@ export function Sidebar() {
   const items = user ? NAV_BY_ROLE[user.role] : [];
 
   return (
-    <aside className="hidden w-64 shrink-0 border-r bg-card md:flex md:flex-col">
+    <aside className="sticky top-0 hidden h-screen w-64 shrink-0 border-r bg-card md:flex md:flex-col">
       <div className="flex h-16 items-center gap-2 border-b px-6 font-semibold">
         <GraduationCap className="h-6 w-6 text-primary" />
         <span>Admission Platform</span>
@@ -69,9 +69,9 @@ export function Sidebar() {
             end={item.to === "/dashboard"}
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                 isActive
-                  ? "bg-primary text-primary-foreground"
+                  ? "bg-primary/10 text-primary ring-1 ring-primary/20"
                   : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
               )
             }
@@ -82,5 +82,28 @@ export function Sidebar() {
         ))}
       </nav>
     </aside>
+  );
+}
+
+/** Horizontal nav for small screens, where the sidebar is hidden. */
+export function MobileNav() {
+  const { user } = useAuth();
+  const items = user ? NAV_BY_ROLE[user.role] : [];
+  return (
+    <nav aria-label="Primary" className="flex gap-1 overflow-x-auto border-b bg-card px-3 py-2 md:hidden">
+      {items.map((item) => (
+        <NavLink
+          key={item.label}
+          to={item.to}
+          end={item.to === "/dashboard"}
+          className={({ isActive }) =>
+            cn("flex shrink-0 items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium", isActive ? "bg-primary/10 text-primary" : "text-muted-foreground")
+          }
+        >
+          <item.icon className="h-4 w-4" />
+          {item.label}
+        </NavLink>
+      ))}
+    </nav>
   );
 }

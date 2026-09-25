@@ -6,8 +6,7 @@ import { Link } from "react-router-dom";
 import { AlertCircle, CheckCircle2, ArrowLeft } from "lucide-react";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { FloatField } from "@/components/ui/float-field";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { forgotPasswordRequest } from "./auth.api";
 
@@ -56,8 +55,7 @@ export default function ForgotPasswordPage() {
                 </div>
               )}
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="you@example.com" {...register("email")} />
+                <FloatField id="email" label="Email" type="email" {...register("email")} />
                 {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
               </div>
               <Button type="submit" className="w-full" isLoading={isSubmitting}>

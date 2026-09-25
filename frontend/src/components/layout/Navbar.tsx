@@ -14,7 +14,7 @@ export function Navbar() {
   };
 
   return (
-    <header className="flex h-16 items-center justify-between border-b bg-card px-6">
+    <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b bg-card px-4 sm:px-6">
       <div>
         <p className="text-sm text-muted-foreground">Welcome back,</p>
         <p className="font-semibold">{user?.name ?? "—"}</p>
