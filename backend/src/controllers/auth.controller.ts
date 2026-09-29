@@ -8,8 +8,8 @@ import { StudentProfile } from "../models/StudentProfile.model";
 import { RefreshToken } from "../models/RefreshToken.model";
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../utils/jwt";
 import { env, isProd } from "../config/env";
-import { RegisterInput, LoginInput, ForgotPasswordInput, ResetPasswordInput } from "../validations/auth.validation";
-import { sendEmail } from "../utils/email";
+import { RegisterInput, LoginInput, ForgotPasswordInput, ResetPasswordInput, VerifyEmailInput, ResendVerificationInput } from "../validations/auth.validation";
+import { sendEmail, verificationEmailTemplate } from "../utils/email";
 import { logger } from "../utils/logger";
 
 const REFRESH_COOKIE = "refreshToken";
@@ -40,6 +40,30 @@ async function issueTokens(userId: string, role: "STUDENT" | "FACULTY" | "ADMIN"
   return { accessToken, refreshToken };
 }
 
+const VERIFY_TOKEN_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+/** Generates a fresh verification token on the user, saves it and emails the link. */
+async function sendVerificationEmail(user: InstanceType<typeof User>) {
+  const rawToken = crypto.randomBytes(32).toString("hex");
+  user.emailVerificationToken = crypto.createHash("sha256").update(rawToken).digest("hex");
+  user.emailVerificationExpires = new Date(Date.now() + VERIFY_TOKEN_TTL_MS);
+  await user.save();
+
+  const verifyUrl = `${env.clientUrl}/verify-email?token=${rawToken}`;
+  const sent = await sendEmail({
+    to: user.email,
+    toName: user.name,
+    subject: "Verify your email address",
+    html: verificationEmailTemplate({ name: user.name, verifyUrl }),
+  });
+
+  if (!sent) {
+    // Email isn't configured (or failed) — log the link so the flow is still testable in dev.
+    logger.info(`[email-verification] Verification link for ${user.email}: ${verifyUrl}`);
+  }
+  return sent;
+}
+
 export const register = asyncHandler(async (req: Request, res: Response) => {
   const { name, email, password, role } = req.body as RegisterInput;
 
@@ -57,25 +81,23 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
     await StudentProfile.create({ user: user._id, education: [] });
   }
 
-  const { accessToken, refreshToken } = await issueTokens(
-    user._id.toString(),
-    user.role,
-    user.tokenVersion,
-    { ip: req.ip, userAgent: req.headers["user-agent"] }
-  );
-
-  res.cookie(REFRESH_COOKIE, refreshToken, cookieOptions());
+  // No session is issued here — the student must verify their email first.
+  const emailSent = await sendVerificationEmail(user);
 
   res.status(201).json(
-    new ApiResponse("Registration successful", {
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
-      accessToken,
-    })
+    new ApiResponse(
+      "Registration successful. Please check your email and click the verification link before logging in.",
+      {
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
+        requiresEmailVerification: true,
+        emailSent,
+      }
+    )
   );
 });
 
@@ -90,6 +112,15 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   const isMatch = await user.comparePassword(password);
   if (!isMatch) {
     throw ApiError.unauthorized("Invalid email or password");
+  }
+
+  // Students self-register, so they must prove they own the email first.
+  // (Faculty/Admin accounts are provisioned by an admin and are pre-verified.)
+  if (user.role === "STUDENT" && !user.isEmailVerified) {
+    throw new ApiError(403, "Please verify your email address before logging in. Check your inbox for the verification link.", {
+      code: "EMAIL_NOT_VERIFIED",
+      email: user.email,
+    });
   }
 
   user.lastLoginAt = new Date();
@@ -254,4 +285,44 @@ export const resetPassword = asyncHandler(async (req: Request, res: Response) =>
   await RefreshToken.updateMany({ user: user._id, revoked: false }, { revoked: true });
 
   res.status(200).json(new ApiResponse("Password reset successfully. Please log in with your new password."));
+});
+
+
+export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
+  const { token } = req.body as VerifyEmailInput;
+
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+  const user = await User.findOne({
+    emailVerificationToken: hashedToken,
+    emailVerificationExpires: { $gt: new Date() },
+  }).select("+emailVerificationToken +emailVerificationExpires");
+
+  if (!user) {
+    throw ApiError.badRequest("This verification link is invalid or has expired. Please request a new one.");
+  }
+
+  user.isEmailVerified = true;
+  user.emailVerificationToken = undefined;
+  user.emailVerificationExpires = undefined;
+  await user.save();
+
+  res.status(200).json(new ApiResponse("Email verified successfully. You can now log in."));
+});
+
+export const resendVerification = asyncHandler(async (req: Request, res: Response) => {
+  const { email } = req.body as ResendVerificationInput;
+
+  // Same generic reply whether or not the account exists / is already verified (no account enumeration).
+  const genericResponse = new ApiResponse(
+    "If that account exists and is not yet verified, a new verification email has been sent."
+  );
+
+  const user = await User.findOne({ email });
+  if (!user || !user.isActive || user.isEmailVerified) {
+    res.status(200).json(genericResponse);
+    return;
+  }
+
+  await sendVerificationEmail(user);
+  res.status(200).json(genericResponse);
 });

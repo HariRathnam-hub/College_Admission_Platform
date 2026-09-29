@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { FloatField } from "@/components/ui/float-field";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
+import { resendVerificationRequest } from "./auth.api";
 
 const loginSchema = z.object({
   email: z.string().trim().email("Enter a valid email address"),
@@ -22,6 +23,8 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
 
   const {
     register,
@@ -31,12 +34,26 @@ export default function LoginPage() {
 
   const onSubmit = async (values: LoginForm) => {
     setServerError(null);
+    setUnverifiedEmail(null);
+    setResendMessage(null);
     try {
       await login(values, "STUDENT");
       const redirectTo = (location.state as { from?: string })?.from ?? "/dashboard";
       navigate(redirectTo, { replace: true });
     } catch (error: any) {
+      if (error?.response?.data?.details?.code === "EMAIL_NOT_VERIFIED") {
+        setUnverifiedEmail(values.email);
+      }
       setServerError(error?.response?.data?.message ?? error?.message ?? "Unable to sign in. Please try again.");
+    }
+  };
+
+  const handleResend = async () => {
+    if (!unverifiedEmail) return;
+    try {
+      setResendMessage(await resendVerificationRequest(unverifiedEmail));
+    } catch (error: any) {
+      setResendMessage(error?.response?.data?.message ?? "Could not resend the email. Please try again.");
     }
   };
 
@@ -49,6 +66,18 @@ export default function LoginPage() {
               <div className="flex items-center gap-2 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
                 <AlertCircle className="h-4 w-4 shrink-0" />
                 {serverError}
+              </div>
+            )}
+            {unverifiedEmail && (
+              <div className="text-xs text-muted-foreground">
+                {resendMessage ?? (
+                  <>
+                    Didn&apos;t get the email?{" "}
+                    <button type="button" onClick={handleResend} className="font-medium text-primary hover:underline">
+                      Resend verification email
+                    </button>
+                  </>
+                )}
               </div>
             )}
 

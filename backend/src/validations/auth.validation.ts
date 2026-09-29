@@ -21,6 +21,18 @@ export const loginSchema = z.object({
   }),
 });
 
+export const verifyEmailSchema = z.object({
+  body: z.object({
+    token: z.string().min(1, "Verification token is required"),
+  }),
+});
+
+export const resendVerificationSchema = z.object({
+  body: z.object({
+    email: z.string().trim().email("Invalid email address"),
+  }),
+});
+
 export const refreshSchema = z.object({
   body: z.object({
     refreshToken: z.string().optional(),
@@ -60,4 +72,6 @@ export const resetPasswordSchema = z.object({
 export type RegisterInput = z.infer<typeof registerSchema>["body"];
 export type LoginInput = z.infer<typeof loginSchema>["body"];
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>["body"];
+export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>["body"];
+export type ResendVerificationInput = z.infer<typeof resendVerificationSchema>["body"];
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>["body"];

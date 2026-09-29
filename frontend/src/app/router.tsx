@@ -8,6 +8,7 @@ import AdminLoginPage from "@/features/auth/AdminLoginPage";
 import ForgotPasswordPage from "@/features/auth/ForgotPasswordPage";
 import ResetPasswordPage from "@/features/auth/ResetPasswordPage";
 import RegisterPage from "@/features/auth/RegisterPage";
+import VerifyEmailPage from "@/features/auth/VerifyEmailPage";
 import DashboardPage from "@/features/dashboard/DashboardPage";
 import ProfilePage from "@/features/profile/ProfilePage";
 import ProgramsPage from "@/features/programs/ProgramsPage";
@@ -32,6 +33,8 @@ const LandingPage = lazy(() => import("@/pages/LandingPage"));
 import NotFoundPage from "@/pages/NotFoundPage";
 
 export const router = createBrowserRouter([
+  // Reachable whether or not someone is logged in (link is opened from an email).
+  { path: "/verify-email", element: <VerifyEmailPage /> },
   {
     element: <PublicOnlyRoute />,
     children: [

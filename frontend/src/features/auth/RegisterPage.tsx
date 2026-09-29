@@ -2,13 +2,14 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Link, useNavigate } from "react-router-dom";
-import { AlertCircle } from "lucide-react";
+import { Link } from "react-router-dom";
+import { AlertCircle, MailCheck } from "lucide-react";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { Button } from "@/components/ui/button";
 import { FloatField } from "@/components/ui/float-field";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
+import { resendVerificationRequest } from "./auth.api";
 
 const registerSchema = z
   .object({
@@ -31,8 +32,10 @@ type RegisterForm = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
   const { register: registerUser } = useAuth();
-  const navigate = useNavigate();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
+  const [isResending, setIsResending] = useState(false);
 
   const {
     register,
@@ -44,11 +47,52 @@ export default function RegisterPage() {
     setServerError(null);
     try {
       await registerUser({ name: values.name, email: values.email, password: values.password });
-      navigate("/dashboard", { replace: true });
+      setRegisteredEmail(values.email);
     } catch (error: any) {
       setServerError(error?.response?.data?.message ?? "Unable to create account. Please try again.");
     }
   };
+
+  const handleResend = async () => {
+    if (!registeredEmail) return;
+    setIsResending(true);
+    setResendMessage(null);
+    try {
+      setResendMessage(await resendVerificationRequest(registeredEmail));
+    } catch (error: any) {
+      setResendMessage(error?.response?.data?.message ?? "Could not resend the email. Please try again.");
+    } finally {
+      setIsResending(false);
+    }
+  };
+
+  if (registeredEmail) {
+    return (
+      <AuthLayout title="Check your email" subtitle="One last step to activate your account">
+        <Card>
+          <CardContent className="space-y-4 pt-6 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <MailCheck className="h-6 w-6" />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              We sent a verification link to <span className="font-medium text-foreground">{registeredEmail}</span>.
+              Click the link in that email (valid for 24 hours), then sign in.
+            </p>
+            {resendMessage && <p className="text-xs text-muted-foreground">{resendMessage}</p>}
+            <Button type="button" variant="outline" className="w-full" onClick={handleResend} isLoading={isResending}>
+              Resend verification email
+            </Button>
+          </CardContent>
+          <CardFooter className="justify-center text-sm text-muted-foreground">
+            Already verified?
+            <Link to="/login" className="ml-1 font-medium text-primary hover:underline">
+              Sign in
+            </Link>
+          </CardFooter>
+        </Card>
+      </AuthLayout>
+    );
+  }
 
   return (
     <AuthLayout title="Create your account" subtitle="Start your admission journey today">

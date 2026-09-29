@@ -1,14 +1,15 @@
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
-import { AuthUser, LoginPayload, RegisterPayload, UserRole } from "@/features/auth/auth.types";
+import { AuthUser, LoginPayload, RegisterPayload, RegisterResponse, UserRole } from "@/features/auth/auth.types";
 import { fetchCurrentUser, loginRequest, logoutRequest, registerRequest } from "@/features/auth/auth.api";
 import { getAccessToken, setAccessToken } from "@/lib/axios";
+import { queryClient } from "@/lib/queryClient";
 
 interface AuthContextValue {
   user: AuthUser | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (payload: LoginPayload, expectedRole?: UserRole) => Promise<void>;
-  register: (payload: RegisterPayload) => Promise<void>;
+  register: (payload: RegisterPayload) => Promise<RegisterResponse>;
   logout: () => Promise<void>;
 }
 
@@ -46,6 +47,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [bootstrap]);
 
   const login = async (payload: LoginPayload, expectedRole?: UserRole) => {
+    // Drop anything cached from a previous account/role before the new session starts.
+    queryClient.clear();
     const { user: loggedInUser } = await loginRequest(payload);
     if (expectedRole && loggedInUser.role !== expectedRole) {
       // Wrong portal for this account — undo the login (clears token, revokes the
@@ -57,13 +60,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const register = async (payload: RegisterPayload) => {
-    const { user: registeredUser } = await registerRequest(payload);
-    setUser(registeredUser);
+    // Registration no longer logs the user in; they must verify their email first.
+    return registerRequest(payload);
   };
 
   const logout = async () => {
-    await logoutRequest();
-    setUser(null);
+    try {
+      await logoutRequest();
+    } finally {
+      setAccessToken(null);
+      setUser(null);
+      queryClient.clear(); // never leak one user's cached data into the next session
+    }
   };
 
   return (

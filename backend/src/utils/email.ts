@@ -41,3 +41,17 @@ export function applicationStatusEmailTemplate(params: {
     </div>
   `;
 }
+
+export function verificationEmailTemplate(params: { name: string; verifyUrl: string }) {
+  const { name, verifyUrl } = params;
+  return `
+    <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+      <h2>Verify your email address</h2>
+      <p>Hi ${name},</p>
+      <p>Welcome! Please confirm your email address to activate your account. This link expires in 24 hours.</p>
+      <p><a href="${verifyUrl}" style="display:inline-block;padding:10px 20px;background:#4f46e5;color:#fff;border-radius:6px;text-decoration:none;">Verify email</a></p>
+      <p style="font-size:12px;color:#666;">If the button doesn't work, copy this link into your browser:<br/>${verifyUrl}</p>
+      <p>If you didn't create this account, you can safely ignore this email.</p>
+    </div>
+  `;
+}

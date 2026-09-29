@@ -70,7 +70,7 @@ export const createStaffUser = asyncHandler(async (req: Request, res: Response) 
   const existing = await User.findOne({ email });
   if (existing) throw ApiError.conflict("An account with this email already exists");
 
-  const user = await User.create({ name, email, password, role });
+  const user = await User.create({ name, email, password, role, isEmailVerified: true });
 
   if (role === "FACULTY") {
     await FacultyProfile.create({ user: user._id, department, designation, employeeId });

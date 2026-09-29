@@ -13,6 +13,7 @@
     "start": "node dist/server.js",
     "seed:programs": "ts-node src/scripts/seedPrograms.ts",
     "seed:admin": "ts-node src/scripts/seedAdmin.ts",
+    "migrate:verify-existing": "ts-node src/scripts/verifyExistingUsers.ts",
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {

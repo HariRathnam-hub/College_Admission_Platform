@@ -31,12 +31,27 @@ app.use(mongoSanitize());
 app.use(hpp());
 app.use(requestLogger);
 
+// API responses are per-user and change often — never let the browser or a proxy
+// serve a cached copy (or a 304 from a stale ETag) after data was updated.
+app.use("/api", (_req, res, next) => {
+  res.set({
+    "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+    Pragma: "no-cache",
+    Expires: "0",
+    "Surrogate-Control": "no-store",
+  });
+  next();
+});
+app.set("etag", false);
+
 app.use("/api", apiLimiter);
 app.use("/api/v1/auth/login", authLimiter);
 app.use("/api/v1/auth/register", authLimiter);
 app.use("/api/v1/auth/refresh", authLimiter);
 app.use("/api/v1/auth/forgot-password", authLimiter);
 app.use("/api/v1/auth/reset-password", authLimiter);
+app.use("/api/v1/auth/verify-email", authLimiter);
+app.use("/api/v1/auth/resend-verification", authLimiter);
 app.use("/api/v1/documents", uploadLimiter);
 
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
